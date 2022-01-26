@@ -14,8 +14,8 @@ var corsOptions = {
   credentials: true,
   methods: "*",
 };
-app.use(cors());
-app.use(express.json());
+app.use(cors(corsOptions));
+
 // const productRoute = require("./routes/product");
 // const cartRoute = require("./routes/cart");
 // const orderRoute = require("./routes/order");
@@ -31,12 +31,14 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
-
+app.use(express.json());
 app.use("/api/auth", authRoute);
 app.use("/api/user", userRoute);
 app.use("/api/products", productRouter);
 
 app.use("/api/orders", orderRouter);
-app.listen(process.env.PORT || 8000, () => {
+
+const PORT = process.env.PORT || 7000;
+app.listen(PORT, () => {
   console.log("Backend server is running!");
 });
