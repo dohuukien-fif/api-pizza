@@ -1,7 +1,6 @@
 {
   "name": "api",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js"
@@ -19,5 +18,15 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.1.7",
     "nodemon": "^2.0.15"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dohuukien-fif/api-pizza.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dohuukien-fif/api-pizza/issues"
+  },
+  "homepage": "https://github.com/dohuukien-fif/api-pizza#readme",
+  "description": ""
 }
