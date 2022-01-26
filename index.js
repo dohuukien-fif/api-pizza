@@ -38,7 +38,7 @@ app.use("/api/products", productRouter);
 
 app.use("/api/orders", orderRouter);
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Backend server is running!");
 });
