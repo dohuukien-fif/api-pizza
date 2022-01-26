@@ -14,7 +14,7 @@ var corsOptions = {
   credentials: true,
   methods: "*",
 };
-app.use(cors(corsOptions));
+app.use(cors());
 
 // const productRoute = require("./routes/product");
 // const cartRoute = require("./routes/cart");
