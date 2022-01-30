@@ -8,7 +8,7 @@ const {
 const router = require("express").Router();
 
 //CREATE
-console.log(Product);
+
 router.post("/", verifyTokenAndAdmin, async (req, res) => {
   const newProduct = new Product(req.body);
 
@@ -47,9 +47,12 @@ router.delete("/:id", verifyTokenAndAdmin, async (req, res) => {
 });
 
 //GET PRODUCT
-router.get("/find/:id", async (req, res) => {
+router.get("/:id", async (req, res) => {
+  const qpid = req.params.id;
+
+  console.log("cho", qpid);
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.find((e) => e.id === Number(qpid));
     res.status(200).json(product);
   } catch (err) {
     res.status(500).json(err);
