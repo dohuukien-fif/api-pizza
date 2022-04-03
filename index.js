@@ -22,14 +22,25 @@ app.use(cors());
 // const stripeRoute = require("./routes/stripe");
 // const cors = require("cors");
 
-mongoose
-  .connect(
-    "mongodb+srv://huukien:huukien@cluster0.fy5gf.mongodb.net/shop?retryWrites=true&w=majority"
-  )
-  .then(() => console.log("DB Connection Successfull!"))
-  .catch((err) => {
-    console.log(err);
-  });
+const connectDB = async () => {
+  try {
+    await mongoose.connect(
+      "mongodb+srv://huukien:huukien@cluster0.fy5gf.mongodb.net/shop?retryWrites=true&w=majority",
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      }
+    );
+
+    console.log("MongoDB connected");
+  } catch (error) {
+    console.log(error.message);
+    process.exit(1);
+  }
+};
+
+connectDB();
+
 app.use(express.json());
 app.use("/api/auth", authRoute);
 app.use("/api/user", userRoute);
@@ -37,7 +48,7 @@ app.use("/api/products", productRouter);
 
 app.use("/api/orders", orderRouter);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log("Backend server is running!");
 });

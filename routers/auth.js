@@ -1,62 +1,118 @@
-const router = require("express").Router();
+const express = require("express");
+const router = express.Router();
+const argon2 = require("argon2");
+const jwt = require("jsonwebtoken");
+const { verifyToken } = require("./verifyToken");
+
 const User = require("./../model/User");
 const CryptoJS = require("crypto-js");
-const jwt = require("jsonwebtoken");
-
-//REGISTER
-router.post("/register", async (req, res) => {
-  const newUser = new User({
-    username: req.body.username,
-    email: req.body.email,
-    password: CryptoJS.AES.encrypt(req.body.password, "huukien").toString(),
-  });
-
+// @route GET api/auth
+// @desc Check if user is logged in
+// @access Public
+router.get("/", verifyToken, async (req, res) => {
   try {
-    const savedUser = await newUser.save();
-    res.status(201).json(savedUser);
-  } catch (err) {
-    res.status(500).json(err);
+    const user = await User.findById(req.userId).select("-password");
+    if (!user)
+      return res
+        .status(400)
+        .json({ success: false, message: "User not found" });
+    res.json({ success: true, user });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
-//LOGIN
+// @route POST api/auth/register
+// @desc Register user
+// @access Public
+router.post("/register", async (req, res) => {
+  const { username, password } = req.body;
 
-router.post("/login", async (req, res) => {
+  // Simple validation
+  if (!username || !password)
+    return res
+      .status(400)
+      .json({ success: false, message: "Missing username and/or password" });
+
   try {
-    const user = await User.findOne({
-      username: req.body.username,
-    });
+    // Check for existing user
+    const user = await User.findOne({ username });
 
-    // !user && res.status(404).json("Wrong User Name");
+    if (user)
+      return res
+        .status(400)
+        .json({ success: false, message: "Username already taken" });
 
-    if (!user) {
-      return res.status(404).json("Wrong User Name");
-    }
+    // All good
 
-    const hashedPassword = CryptoJS.AES.decrypt(user.password, "huukien");
+    const newUser = new User({ username, password });
+    await newUser.save();
 
-    const originalPassword = hashedPassword.toString(CryptoJS.enc.Utf8);
-
-    // const inputPassword = req.body.password;
-    if (!hashedPassword) {
-      return res.status(404).json("Wrong Password");
-    }
-    // !originalPassword && res.status(401).json("Wrong Password");
-    // res.status(200).json(user);
-
+    // Return token
     const accessToken = jwt.sign(
-      {
-        id: user._id,
-        isAdmin: user.isAdmin,
-      },
-      process.env.JWT_SEC,
-      { expiresIn: "3d" }
+      { userId: newUser._id },
+      process.env.ACCESS_TOKEN_SECRET
     );
 
-    const { password, ...others } = user._doc;
-    res.status(200).json({ others, accessToken });
-  } catch (err) {
-    res.status(500).json(err);
+    res.json({
+      success: true,
+      message: "User created successfully",
+      accessToken,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// @route POST api/auth/login
+// @desc Login user
+// @access Public
+router.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+
+  // Simple validation
+  if (!username || !password)
+    return res
+      .status(400)
+      .json({ success: false, message: "Missing username and/or password" });
+
+  try {
+    // Check for existing user
+    const user = await User.findOne({ username });
+    if (!user)
+      return res
+        .status(400)
+        .json({ success: false, message: "Incorrect username or password" });
+
+    // Username found
+    const passwordValid = user.password === password;
+
+    if (!passwordValid)
+      return res
+        .status(400)
+        .json({ success: false, message: "Incorrect username or password" });
+
+    // All good
+    // Return token
+    const accessToken = jwt.sign(
+      { userId: user._id },
+      process.env.ACCESS_TOKEN_SECRET
+    );
+    const users = {
+      username,
+      password,
+    };
+
+    res.json({
+      success: true,
+      message: "User logged in successfully",
+      accessToken,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
