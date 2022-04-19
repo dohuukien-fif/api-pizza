@@ -109,6 +109,7 @@ router.post("/login", async (req, res) => {
     };
     console.log(user);
     res.json({
+      id: user._id,
       user,
       success: true,
       message: "User logged in successfully",
@@ -119,5 +120,7 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
+
+//profile
 
 module.exports = router;

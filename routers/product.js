@@ -1,6 +1,8 @@
-const Product = require("./../data");
+const Product = require("./../model/Product");
+const Products = require("./../data");
 const {
   verifyToken,
+  verifyTokens,
   verifyTokenAndAuthorization,
   verifyTokenAndAdmin,
 } = require("./verifyToken");
@@ -78,8 +80,10 @@ router.get("/search", async (req, res) => {
 });
 //GET ALL PRODUCTS
 router.get("/", async (req, res) => {
+  const body = req.query.body;
   const qNew = req.query.new;
   const sorts = req.query._sort;
+  const order = req.query._order;
   const price_lt = req.query._price_lt;
   const price_gt = req.query._price_gt;
   const names = req.query.name;
@@ -87,10 +91,11 @@ router.get("/", async (req, res) => {
   const qprice = req.query.price;
   const reqQuery = { ...req.query };
   const filters = req.query;
-
+  const page = parseInt(req.query.page);
+  const limit = parseInt(req.query.limit);
   console.log(sorts);
   try {
-    let products;
+    let products = {};
     // else if (qprice) {
     //   products = await Product.find({
     //     $and: [
@@ -100,20 +105,30 @@ router.get("/", async (req, res) => {
     //     ],
     //   });
     // }
-    if (sorts === "asc") {
-      products = Product.sort((a, b) => b.price - a.price);
-    } else if (sorts === "desc") {
-      products = Product.sort((a, b) => a.price - b.price);
+
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+
+    if (sorts === "price" && order === "asc") {
+      products = Products.sort((a, b) => b.price - a.price);
+    } else if (sorts === "price" && order === "desc") {
+      products = Products.sort((a, b) => a.price - b.price);
     } else if (qprice) {
-      products = Product.filter((a) => a.price >= qprice);
-    } else if (names || qCategory) {
-      products = Product.filter((item) =>
+      products = Products.filter((a) => a.price >= qprice);
+    } else if (startIndex || endIndex) {
+      products.data = Products.slice(startIndex, endIndex);
+      products.pagination = {
+        page: page,
+        limit: limit,
+      };
+    } else if (filters) {
+      products = Products.filter((item) =>
         Object.entries(filters).every(([key, value]) =>
           item[key].includes(value)
         )
       );
     } else {
-      products = Product;
+      products = Products;
     }
     // console.log((await Product.find()).sort((e) => e.price - e.price));
     res.status(200).json(products);

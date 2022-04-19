@@ -19,7 +19,19 @@ const verifyToken = (req, res, next) => {
     return res.status(403).json({ success: false, message: "Invalid token" });
   }
 };
-
+const verifyTokens = (req, res, next) => {
+  const authHeader = req.headers.accessToken;
+  if (authHeader) {
+    const token = authHeader.split(" ")[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+      if (err) res.status(403).json("Token is not valid!");
+      req.user = user;
+      next();
+    });
+  } else {
+    return res.status(401).json("You are not authenticated!");
+  }
+};
 const verifyTokenAndAuthorization = (req, res, next) => {
   verifyToken(req, res, () => {
     if (req.user.id === req.params.id || req.user.isAdmin) {
@@ -40,8 +52,19 @@ const verifyTokenAndAdmin = (req, res, next) => {
   });
 };
 
+const verifyTokenUser = (req, res, next) => {
+  verifyTokens(req, res, () => {
+    if (req.user._id) {
+      next();
+    } else {
+      res.status(403).json("You are not alowed to do that!");
+    }
+  });
+};
+
 module.exports = {
   verifyToken,
   verifyTokenAndAuthorization,
   verifyTokenAndAdmin,
+  verifyTokenUser,
 };
