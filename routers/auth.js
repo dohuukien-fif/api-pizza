@@ -50,7 +50,10 @@ router.post("/register", async (req, res) => {
     await newUser.save();
 
     // Return token
-    const accessToken = jwt.sign({ userId: newUser._id }, "huukien08032000");
+    const accessToken = jwt.sign(
+      { userId: newUser._id },
+      process.env.ACCESS_TOKEN_SECRET
+    );
 
     console.log(newUser);
 
@@ -96,7 +99,10 @@ router.post("/login", async (req, res) => {
 
     // All good
     // Return token
-    const accessToken = jwt.sign({ userId: user._id }, "huukien08032000");
+    const accessToken = jwt.sign(
+      { userId: user._id },
+      process.env.ACCESS_TOKEN_SECRET
+    );
     const users = {
       username,
       password,
