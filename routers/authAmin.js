@@ -4,7 +4,7 @@ const argon2 = require("argon2");
 const jwt = require("jsonwebtoken");
 const { verifyToken } = require("./verifyToken");
 
-const User = require("./../model/User");
+const User = require("./../model/UserAdmin");
 const CryptoJS = require("crypto-js");
 // @route GET api/auth
 // @desc Check if user is logged in

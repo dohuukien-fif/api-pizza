@@ -1,4 +1,4 @@
-const User = require("./../model/User");
+const UserAdmin = require("./../model/UserAdmin");
 const {
   verifyToken,
   verifyTokenAndAuthorization,
@@ -11,13 +11,15 @@ const router = require("express").Router();
 //UPDATE
 router.patch("/:id", async (req, res) => {
   const { id } = req.params;
+
+  console.log(id);
   const { username, typePassword, newPassword, password } = req.body;
   if (req.body.password) {
     req.body.password;
   }
 
   try {
-    const user = await User.findOne({ username });
+    const user = await UserAdmin.findOne({ username });
 
     console.log(user);
     if (!user)
@@ -37,7 +39,7 @@ router.patch("/:id", async (req, res) => {
         .status(400)
         .json({ success: false, message: "vui lòng kiểm lại tra mật  khẩu" });
 
-    const updatedUser = await User.findByIdAndUpdate(
+    const updatedUser = await UserAdmin.findByIdAndUpdate(
       id,
       {
         password: typePassword,
@@ -57,7 +59,7 @@ router.patch("/image/:id", async (req, res) => {
 
   console.log(id);
   try {
-    const updatedProduct = await User.findByIdAndUpdate(
+    const updatedProduct = await UserAdmin.findByIdAndUpdate(
       id,
       {
         image: image,
@@ -73,7 +75,7 @@ router.patch("/image/:id", async (req, res) => {
 //DELETE
 router.delete("/:id", async (req, res) => {
   try {
-    await User.findByIdAndDelete(req.params.id);
+    await UserAdmin.findByIdAndDelete(req.params.id);
     res.status(200).json("User has been deleted...");
   } catch (err) {
     res.status(500).json(err);
@@ -83,7 +85,7 @@ router.delete("/:id", async (req, res) => {
 //GET USER
 router.get("/find/:id", async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await UserAdmin.findById(req.params.id);
 
     console.log(user);
 
@@ -100,40 +102,11 @@ router.get("/find/:id", async (req, res) => {
 //GET ALL USER
 router.get("/", async (req, res) => {
   const query = req.query.new;
-  const page = Number.parseInt(req.query.page);
-  const limit = Number.parseInt(req.query.limit);
-
-  const totalRow = Math.ceil(page * limit);
-  const pages = (page - 1) * limit;
-  const limits = page * limit;
-
   try {
-    let dataUser;
-    const users = await User.find();
-
-    if (page && limit) {
-      dataUser = users.slice(pages, limits);
-    } else {
-      dataUser = users;
-    }
-
-    console.log(dataUser, pages, limits);
-    const newUser = {
-      pagination: {
-        page,
-        limit,
-        totalRow: users.length,
-      },
-      data: [...dataUser],
-    };
-
-    if (page || limit) {
-      res.status(200).json(newUser);
-
-      return;
-    } else {
-      res.status(200).json({ data: [...dataUser] });
-    }
+    const users = query
+      ? await UserAdmin.find().sort({ _id: -1 }).limit(5)
+      : await UserAdmin.find();
+    res.status(200).json(users);
   } catch (err) {
     res.status(500).json(err);
   }
@@ -146,7 +119,7 @@ router.get("/stats", verifyTokenAndAdmin, async (req, res) => {
   const lastYear = new Date(date.setFullYear(date.getFullYear() - 1));
 
   try {
-    const data = await User.aggregate([
+    const data = await UserAdmin.aggregate([
       { $match: { createdAt: { $gte: lastYear } } },
       {
         $project: {

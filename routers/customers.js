@@ -1,5 +1,4 @@
-const checkOuts = require("./../model/Orders");
-
+const Customers = require("./../model/Customers");
 const {
   verifyToken,
   verifyTokenAndAuthorization,
@@ -11,17 +10,36 @@ const router = require("express").Router();
 //CREATE
 
 router.post("/", async (req, res) => {
-  const newOrder = new checkOuts(req.body);
-  const savedOrder = await newOrder.save();
-  res.status(200).json(savedOrder);
+  const newOrder = new Customers(req.body);
+
+  console.log(newOrder);
+  try {
+    const savedOrder = await newOrder.save();
+    console.log(savedOrder);
+    res.status(200).json(savedOrder);
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 //UPDATE
 router.patch("/:id", async (req, res) => {
+  console.log(req.params.userId);
+
   try {
-    const updatedOrder = await checkOuts.findByIdAndUpdate(req.params.id, {
-      $set: req.body,
+    const updatedOrder = await Customers.findOne({
+      userId: req.params.id,
     });
+    updatedOrder.userId = req.body.userId;
+    updatedOrder.userName = req.body.userName;
+    updatedOrder.amount = req.body.amount;
+    updatedOrder.totalOrder = req.body.totalOrder;
+    updatedOrder.address = req.body.address;
+    updatedOrder.status = req.body.status;
+
+    await updatedOrder.save();
+
+    console.log("updatedOrder", updatedOrder);
     res.status(200).json(updatedOrder);
   } catch (err) {
     res.status(500).json(err);
@@ -29,18 +47,9 @@ router.patch("/:id", async (req, res) => {
 });
 
 //DELETE
-router.delete("/:id", async (req, res) => {
+router.delete("/:userId", async (req, res) => {
   try {
-    await checkOuts.findByIdAndDelete(req.params.id);
-    res.status(200).json("Order has been deleted...");
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
-//DELETEAll
-router.delete("/", async (req, res) => {
-  try {
-    await checkOuts.deleteMany({});
+    await Customers.findOneAndDelete({ userId: req.params.userId });
     res.status(200).json("Order has been deleted...");
   } catch (err) {
     res.status(500).json(err);
@@ -48,10 +57,12 @@ router.delete("/", async (req, res) => {
 });
 
 //GET USER ORDERS
-router.get("/find/:_id", async (req, res) => {
+
+router.get("/:id", async (req, res) => {
+  console.log("id", req.params.userId);
   try {
-    const orders = await checkOuts.findOne({ _id: req.params._id });
-    res.status(200).json(orders);
+    const Customer = await Customers.findOne({ userId: req.params.id });
+    res.status(200).json(Customer);
   } catch (err) {
     res.status(500).json(err);
   }
@@ -66,10 +77,9 @@ router.get("/", async (req, res) => {
   const totalRow = Math.ceil(page * limit);
   const pages = (page - 1) * limit;
   const limits = page * limit;
-
   try {
     let dataUser;
-    const orders = await checkOuts.find();
+    const orders = await Customers.find();
 
     if (page && limit) {
       dataUser = orders.slice(pages, limits);
@@ -99,48 +109,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-//GET DELIVERY
-router.get("/delivery", async (req, res) => {
-  const page = Number.parseInt(req.query.page);
-  const limit = Number.parseInt(req.query.limit);
-
-  const totalRow = Math.ceil(page * limit);
-  const pages = (page - 1) * limit;
-  const limits = page * limit;
-
-  try {
-    let dataUser;
-    const orders = await (
-      await checkOuts.find({})
-    ).filter((e) => e.status === "Success");
-
-    if (page && limit) {
-      dataUser = orders.slice(pages, limits);
-    } else {
-      dataUser = orders;
-    }
-
-    console.log("orders", orders);
-    const newUser = {
-      pagination: {
-        page,
-        limit,
-        totalRow: orders.length,
-      },
-      data: [...dataUser],
-    };
-    console.log(newUser);
-    if (page || limit) {
-      res.status(200).json(newUser);
-
-      return;
-    } else {
-      res.status(200).json({ data: [...dataUser] });
-    }
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
 // GET MONTHLY INCOME
 
 router.get("/income", verifyTokenAndAdmin, async (req, res) => {

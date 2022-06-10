@@ -11,12 +11,11 @@ const router = require("express").Router();
 
 //CREATE
 
-router.post("/", verifyTokenAndAdmin, async (req, res) => {
-  const newProduct = new Product(req.body);
-
+router.post("/", async (req, res) => {
   try {
-    const savedProduct = await newProduct.save();
-    res.status(200).json(savedProduct);
+    const newProduct = new Product(req.body);
+    await newProduct.save();
+    res.status(200).json(newProduct);
   } catch (err) {
     res.status(500).json(err);
   }
@@ -39,9 +38,9 @@ router.put("/:id", verifyTokenAndAdmin, async (req, res) => {
 });
 
 //DELETE
-router.delete("/:id", verifyTokenAndAdmin, async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
-    await Product.findByIdAndDelete(req.params.id);
+    Products.filter((e) => e.orderId !== req.params.id);
     res.status(200).json("Product has been deleted...");
   } catch (err) {
     res.status(500).json(err);
@@ -52,28 +51,32 @@ router.delete("/:id", verifyTokenAndAdmin, async (req, res) => {
 router.get("/:id", async (req, res) => {
   const qpid = req.params.id;
 
-  console.log("cho", qpid);
   try {
-    const product = await Product.find((e) => e.id === Number(qpid));
-    res.status(200).json(product);
+    const productss = await Products.find((e) => e.orderId === Number(qpid));
+    res.status(200).json(productss);
   } catch (err) {
     res.status(500).json(err);
   }
 });
 router.get("/search", async (req, res) => {
   const qpSearch = req.query.q;
-
+  console.log("qpSearch", req.query.q);
   try {
     let products;
+
+    const dataProduct = await Product.find({});
+
+    console.log(dataProduct);
+    console.log("qpSearch", dataProduct);
     if (qpSearch) {
-      products = Product.filter((items) =>
+      products = dataProduct.filter((items) =>
         items.category?.toLowerCase().includes(qpSearch.trim().toLowerCase())
       );
     } else {
-      products = Product;
+      products = dataProduct;
     }
 
-    res.status(200).json(products);
+    res.status(200).json(dataProduct);
   } catch (err) {
     res.status(500).json(err);
   }
@@ -94,8 +97,13 @@ router.get("/", async (req, res) => {
   const page = parseInt(req.query.page);
   const limit = parseInt(req.query.limit);
   console.log(sorts);
+
+  checkFilters = Object.keys(filters).length > 0;
   try {
     let products = {};
+
+    const dataProduct = await Product.find({});
+
     // else if (qprice) {
     //   products = await Product.find({
     //     $and: [
@@ -110,28 +118,45 @@ router.get("/", async (req, res) => {
     const endIndex = page * limit;
 
     if (sorts === "price" && order === "asc") {
-      products = Products.sort((a, b) => b.price - a.price);
+      products = dataProduct.sort((a, b) => b.price - a.price);
     } else if (sorts === "price" && order === "desc") {
-      products = Products.sort((a, b) => a.price - b.price);
+      products = dataProduct.sort((a, b) => a.price - b.price);
     } else if (qprice) {
-      products = Products.filter((a) => a.price >= qprice);
-    } else if (startIndex || endIndex) {
-      products.data = Products.slice(startIndex, endIndex);
-      products.pagination = {
-        page: page,
-        limit: limit,
-      };
-    } else if (filters) {
-      products = Products.filter((item) =>
-        Object.entries(filters).every(([key, value]) =>
-          item[key].includes(value)
-        )
+      products = dataProduct.filter((a) => a.price >= qprice);
+    } else if (page || limit) {
+      products = dataProduct.slice(startIndex, endIndex);
+    } else if (checkFilters) {
+      products = dataProduct.filter((item) =>
+        item[Object.keys(filters)].includes(Object.values(filters).join())
       );
+
+      // console.log((await Product.find()).sort((e) => e.price - e.price));
     } else {
       products = Products;
     }
-    // console.log((await Product.find()).sort((e) => e.price - e.price));
-    res.status(200).json(products);
+
+    if (page || limit) {
+      const newProduct = {
+        pagination: {
+          page: page || 1,
+          limit: limit || 10,
+          totalRow: dataProduct.length,
+        },
+        data: [...products],
+      };
+
+      // console.log((await Product.find()).sort((e) => e.price - e.price));
+      res.status(200).json(newProduct);
+
+      return;
+    } else {
+      const newProductss = {
+        data: [...products],
+      };
+
+      console.log("dataProduct", newProductss);
+      res.status(200).json(newProductss);
+    }
   } catch (err) {
     res.status(500).json(err);
   }

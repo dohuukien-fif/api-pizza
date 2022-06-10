@@ -8,14 +8,20 @@ const authRoute = require("./routers/auth");
 const productRouter = require("./routers/product");
 
 const orderRouter = require("./routers/order");
+const customersrRouter = require("./routers/customers");
+const adminRouter = require("./routers/authAmin");
+const userAdminRoute = require("./routers/userAdmin");
+const searchRoute = require("./routers/search");
 const cors = require("cors");
+
 var corsOptions = {
   origin: "*",
   credentials: true,
   methods: "*",
 };
-app.use(cors());
 
+app.use(cors());
+app.use(express.json());
 // const productRoute = require("./routes/product");
 // const cartRoute = require("./routes/cart");
 // const orderRoute = require("./routes/order");
@@ -41,13 +47,14 @@ const connectDB = async () => {
 
 connectDB();
 
-app.use(express.json());
 app.use("/api/auth", authRoute);
-app.use("/api/user", userRoute);
+app.use("/api/auth/admin", adminRouter);
+app.use("/api/user/admin", userAdminRoute);
 app.use("/api/products", productRouter);
-
-app.use("/api/orders", orderRouter);
-
+app.use("/api/user", userRoute);
+app.use("/api/order", orderRouter);
+app.use("/api/search", searchRoute);
+app.use("/api/customers", customersrRouter);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log("Backend server is running!");
