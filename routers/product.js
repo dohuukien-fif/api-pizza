@@ -52,7 +52,7 @@ router.get("/:id", async (req, res) => {
   const qpid = req.params.id;
 
   try {
-    const productss = await Products.find((e) => e.orderId === Number(qpid));
+    const productss = await Product.findOne({ orderId: Number(qpid) });
     res.status(200).json(productss);
   } catch (err) {
     res.status(500).json(err);
@@ -162,17 +162,18 @@ router.get("/", async (req, res) => {
   }
 });
 ////
-router.put("/:id", async (req, res) => {
+router.put("/:id/like", async (req, res) => {
   const id = req.params.id;
   const { userId } = req.body;
 
+  console.log(id);
   try {
-    const post = await PostModel.findById(id);
-    if (!post.likes.includes(userId)) {
-      await post.updateOne({ $push: { likes: userId } });
+    const post = await Product.findOne({ orderId: id });
+    if (!post.like.includes(userId)) {
+      await post.updateOne({ $push: { like: userId } });
       res.status(200).json("Post liked");
     } else {
-      await post.updateOne({ $pull: { likes: userId } });
+      await post.updateOne({ $pull: { like: userId } });
       res.status(200).json("Post Unliked");
     }
   } catch (error) {
