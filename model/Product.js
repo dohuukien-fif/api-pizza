@@ -12,5 +12,6 @@ const productSchema = new mongoose.Schema({
   more: { type: Array },
   size: { type: Array },
   soles: { type: Array },
+  like: [],
 });
 module.exports = mongoose.model("back", productSchema);
