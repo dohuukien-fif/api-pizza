@@ -12,6 +12,8 @@ const customersrRouter = require("./routers/customers");
 const adminRouter = require("./routers/authAmin");
 const userAdminRoute = require("./routers/userAdmin");
 const searchRoute = require("./routers/search");
+const managerRoute = require("./routers/manager");
+const Data = require("./routers/insert");
 const cors = require("cors");
 
 var corsOptions = {
@@ -46,7 +48,7 @@ const connectDB = async () => {
 };
 
 connectDB();
-
+app.use("/api", Data);
 app.use("/api/auth", authRoute);
 app.use("/api/auth/admin", adminRouter);
 app.use("/api/user/admin", userAdminRoute);
@@ -54,6 +56,7 @@ app.use("/api/products", productRouter);
 app.use("/api/user", userRoute);
 app.use("/api/order", orderRouter);
 app.use("/api/search", searchRoute);
+app.use("/api/manager", managerRoute);
 app.use("/api/customers", customersrRouter);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
