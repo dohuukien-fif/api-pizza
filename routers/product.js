@@ -129,7 +129,7 @@ router.get("/", async (req, res) => {
 
       // console.log((await Product.find()).sort((e) => e.price - e.price));
     } else {
-      products = Products;
+      products = dataProduct;
     }
 
     if (page || limit) {
@@ -139,7 +139,7 @@ router.get("/", async (req, res) => {
           limit: limit || 10,
           totalRow: dataProduct.length,
         },
-        data: [...products],
+        data: [...dataProduct],
       };
 
       // console.log((await Product.find()).sort((e) => e.price - e.price));
