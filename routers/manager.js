@@ -23,24 +23,16 @@ router.post("/", async (req, res) => {
 });
 
 //UPDATE
-router.patch("/:id", async (req, res) => {
-  console.log(req.params.userId);
-
+router.put("/:id", async (req, res) => {
+  console.log("id", req.params.id);
+  console.log("updatedProduct", req.params.id);
   try {
-    const updatedOrder = await Manager.findOne({
-      userId: req.params.id,
+    const updatedProduct = await Manager.findByIdAndUpdate(req.params.id, {
+      $set: req.body,
     });
-    updatedOrder.userId = req.body.userId;
-    updatedOrder.userName = req.body.userName;
-    updatedOrder.amount = req.body.amount;
-    updatedOrder.totalOrder = req.body.totalOrder;
-    updatedOrder.address = req.body.address;
-    updatedOrder.status = req.body.status;
 
-    await updatedOrder.save();
-
-    console.log("updatedOrder", updatedOrder);
-    res.status(200).json(updatedOrder);
+    console.log("updatedProduct", updatedProduct);
+    res.status(200).json(updatedProduct);
   } catch (err) {
     res.status(500).json(err);
   }
@@ -59,10 +51,12 @@ router.delete("/:userId", async (req, res) => {
 //GET USER ORDERS
 
 router.get("/:id", async (req, res) => {
-  console.log("id", req.params.userId);
+  console.log("id", req.params.id);
   try {
-    const Customer = await Manager.findOne({ userId: req.params.id });
-    res.status(200).json(Customer);
+    const ManagetData = await Manager.findById(req.params.id);
+
+    console.log("managerId", ManagetData);
+    res.status(200).json(ManagetData);
   } catch (err) {
     res.status(500).json(err);
   }

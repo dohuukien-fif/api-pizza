@@ -9,6 +9,7 @@ const ManagerSchema = new mongoose.Schema(
     identification: { type: Number },
     telephone: { type: Number },
     address: { type: String },
+    image: { type: String },
   },
   { timestamps: true }
 );

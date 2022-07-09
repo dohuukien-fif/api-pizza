@@ -8,6 +8,7 @@ const CustomersSchema = new mongoose.Schema(
     totalOrder: { type: Number },
     address: { type: Object },
     status: { type: String, default: "pending" },
+    
   },
   { timestamps: true }
 );

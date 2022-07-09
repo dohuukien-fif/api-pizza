@@ -11,7 +11,7 @@ const router = require("express").Router();
 //UPDATE
 router.patch("/:id", async (req, res) => {
   const { id } = req.params;
-  const { username, typePassword, newPassword, password } = req.body;
+  const { username, typePassword, newPassword, password, newImage } = req.body;
   if (req.body.password) {
     req.body.password;
   }
@@ -37,9 +37,15 @@ router.patch("/:id", async (req, res) => {
         .status(400)
         .json({ success: false, message: "vui lòng kiểm lại tra mật  khẩu" });
 
+    if (newImage === "")
+      return res
+        .status(400)
+        .json({ success: false, message: "vui lòng kiểm lại ảnh đại diện" });
+
     const updatedUser = await User.findByIdAndUpdate(
       id,
       {
+        image: newImage,
         password: typePassword,
       },
       { new: true }
