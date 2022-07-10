@@ -1,6 +1,6 @@
 const Product = [
   {
-    category: "newDish",
+    category: "newDis",
     orderId: 1,
     image:
       "https://www.freepnglogos.com/uploads/pizza-png/pizza-images-download-pizza-33.png",
