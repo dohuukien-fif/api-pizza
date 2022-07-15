@@ -13,7 +13,7 @@ router.patch("/:id", async (req, res) => {
   const { id } = req.params;
 
   console.log(id);
-  const { username, typePassword, newPassword, password } = req.body;
+  const { username, typePassword, newPassword, password, newImage } = req.body;
   if (req.body.password) {
     req.body.password;
   }
@@ -42,6 +42,7 @@ router.patch("/:id", async (req, res) => {
     const updatedUser = await UserAdmin.findByIdAndUpdate(
       id,
       {
+        image: newImage,
         password: typePassword,
       },
       { new: true }

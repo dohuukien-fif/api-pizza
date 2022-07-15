@@ -37,7 +37,7 @@ router.put("/:id", async (req, res) => {
 //DELETE
 router.delete("/:id", async (req, res) => {
   try {
-    Products.filter((e) => e.orderId !== req.params.id);
+    await Product.findByIdAndDelete(req.params.id);
     res.status(200).json("Product has been deleted...");
   } catch (err) {
     res.status(500).json(err);
@@ -116,6 +116,8 @@ router.get("/", async (req, res) => {
 
     if (sorts === "price" && order === "asc") {
       products = dataProduct.sort((a, b) => b.price - a.price);
+    } else if (qCategory) {
+      products = dataProduct.filter((e) => e.category === qCategory);
     } else if (sorts === "price" && order === "desc") {
       products = dataProduct.sort((a, b) => a.price - b.price);
     } else if (qprice) {
@@ -139,7 +141,7 @@ router.get("/", async (req, res) => {
           limit: limit || 10,
           totalRow: dataProduct.length,
         },
-        data: [...dataProduct],
+        data: [...products],
       };
 
       // console.log((await Product.find()).sort((e) => e.price - e.price));
